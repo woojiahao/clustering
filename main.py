@@ -1,9 +1,11 @@
 import logging
 import pandas as pd
+import numpy as np
 
 from sentence_transformers import SentenceTransformer
 from dataclasses import dataclass
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
+from scipy.spatial.distance import cosine
 from typing import List
 
 logging.basicConfig(level=logging.WARN)
@@ -33,6 +35,7 @@ data = [
     Entry(key="f", categories=["animal"], description="This is only an animal"),
 ]
 
+
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 grouping = {}
@@ -52,15 +55,30 @@ for category, entries in grouping.items():
     Z = linkage(embeddings, method="weighted", metric="cosine")
     clusters = fcluster(Z, 2, criterion="maxclust")
     key_with_cluster = {}
-    for e, c in zip(entries, clusters):
+    for i, (e, c) in enumerate(zip(entries, clusters)):
         if c not in key_with_cluster:
-            key_with_cluster[c] = set()
-        key_with_cluster[c].add(e.key)
+            key_with_cluster[c] = []
+        key_with_cluster[c].append((e.key, embeddings[i]))
 
-    print(key_with_cluster)
+    centroids = {
+        cluster: np.mean(np.array([v[1] for v in vectors]), axis=0)
+        for cluster, vectors in key_with_cluster.items()
+    }
 
-    target = Entry(
-        key="z", description="This is one of the other clusters", categories=["insect"]
-    )
+    # target = Entry(
+    #     key="z", description="This is one of the other clusters", categories=["insect"]
+    # )
+    target = Entry(key="z", description="This is only an insect", categories=["insect"])
 
     target_embedding = model.encode(target.description)
+
+    closest_cluster = None
+    min_distance = 10**9
+    for cluster, centroid in centroids.items():
+        distance = cosine(target_embedding, centroid)
+        if distance < min_distance:
+            min_distance = distance
+            closest_cluster = cluster
+
+    print(closest_cluster)
+    print(min_distance)
