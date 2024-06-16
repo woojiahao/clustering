@@ -53,7 +53,7 @@ for category, entries in grouping.items():
     embeddings = model.encode(sentences)
 
     Z = linkage(embeddings, method="weighted", metric="cosine")
-    clusters = fcluster(Z, 2, criterion="maxclust")
+    clusters = fcluster(Z, 3, criterion="maxclust")
     key_with_cluster = {}
     for i, (e, c) in enumerate(zip(entries, clusters)):
         if c not in key_with_cluster:
