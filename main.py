@@ -68,7 +68,11 @@ for category, entries in grouping.items():
     # target = Entry(
     #     key="z", description="This is one of the other clusters", categories=["insect"]
     # )
-    target = Entry(key="z", description="This is only an insect", categories=["insect"])
+    target = Entry(
+        key="z",
+        description="This is only an insect, but maybe an animal",
+        categories=["insect"],
+    )
 
     target_embedding = model.encode(target.description)
 
@@ -82,3 +86,5 @@ for category, entries in grouping.items():
 
     print(closest_cluster)
     print(min_distance)
+
+    print([v[0] for v in key_with_cluster[closest_cluster]])
