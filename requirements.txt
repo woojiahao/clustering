@@ -1,0 +1,8 @@
+dataclasses
+sentence-transformers
+scipy
+seaborn
+matplotlib
+numpy
+pandas
+umap-learn
